@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Budget Tracker V28.1 Fixed</title>
+<style>
+:root{--bg:#090c11;--panel:#11161e;--panel2:#0d1219;--border:#222a36;--text:#eef2f7;--muted:#8994a5;--purple:#8b5cf6;--orange:#f97316;--red:#ef4444;--green:#22c55e;--yellow:#eab308;--blue:#60a5fa}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}.app{max-width:1120px;margin:auto;padding:18px 16px 42px}
+header{position:sticky;top:0;z-index:20;background:rgba(9,12,17,.94);backdrop-filter:blur(12px);padding:8px 0 12px}
+.brand{font-weight:800;font-size:18px}.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin-top:12px;width:100%}
+.tabs a,.btn{border:1px solid var(--border);background:#121821;color:var(--muted);border-radius:9px;padding:9px 8px;cursor:pointer;text-decoration:none;text-align:center;min-width:0}
+.tabs a:hover,.btn:hover{color:white;background:#19212d}.tabs a.active{background:#222c3a;color:white;border-color:#354357}
+.monthbar{display:flex;justify-content:center;align-items:center;gap:9px;margin:17px 0 13px}.monthbar .month{min-width:190px;text-align:center;font-size:19px;font-weight:800;cursor:pointer}.arrow{width:38px;height:38px;padding:0}.today{font-size:12px}
+.view{display:none}.view.active{display:block}.grid{display:grid;gap:11px}.hero{grid-template-columns:minmax(300px,.85fr) minmax(0,1.5fr)}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:15px}.donut-card{display:flex;justify-content:center;align-items:center;min-height:310px}
+.donut{width:238px;height:238px;border-radius:50%;position:relative;background:conic-gradient(var(--purple) 0 0,var(--orange) 0 0,var(--red) 0 0,var(--green) 0 0,var(--yellow) 0 100%)}
+.donut:after{content:"";position:absolute;inset:32px;border-radius:50%;background:var(--panel)}
+.donut-center{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:center;align-items:center;pointer-events:none}.donut-center .num{font-size:28px;font-weight:850}.donut-center .sub{font-size:11px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.07em}
+.kpis{grid-template-columns:repeat(2,1fr)}.kpi:first-child{grid-column:1/-1}.label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}.value{font-size:23px;font-weight:800;margin-top:7px}.dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:7px}
+.purple{background:var(--purple)}.orange{background:var(--orange)}.red{background:var(--red)}.green{background:var(--green)}.yellow{background:var(--yellow)}
+.positive{color:var(--green)}.negative{color:var(--red)}h2{font-size:15px;margin:0 0 11px}.section{margin-top:11px}.compare{grid-template-columns:repeat(4,1fr)}.compare .card{padding:12px}.small{font-size:11px;color:var(--muted)}.big{font-weight:800;font-size:17px;margin-top:4px}
+.trend{height:130px;display:flex;align-items:flex-end;gap:8px}.trend-col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;gap:5px}.bars{height:100%;display:flex;align-items:flex-end;gap:3px}.bar{width:50%;border-radius:4px 4px 1px 1px;min-height:2px}.monthlab{text-align:center;font-size:10px;color:var(--muted)}
+.ytd{grid-template-columns:repeat(5,1fr)}.row{display:grid;grid-template-columns:minmax(140px,1.5fr) repeat(3,1fr) auto;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}.row:last-child{border:0}
+input,select{width:100%;background:#0b1017;color:var(--text);border:1px solid #293342;border-radius:8px;padding:9px}.money{text-align:right}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.actions{display:flex;gap:6px}.danger{background:#301518;border:1px solid #63252b;color:#ffb7bd;border-radius:8px;padding:8px 10px;cursor:pointer}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:100;align-items:center;justify-content:center;padding:16px}.modal.open{display:flex}.modalbox{width:min(520px,100%);background:#11161e;border:1px solid #303a49;border-radius:15px;padding:18px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
+.pill{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:3px 7px;font-size:10px;color:var(--muted)}
+.progress{height:7px;background:#252d39;border-radius:999px;overflow:hidden;margin-top:7px}.progress span{display:block;height:100%;background:var(--green)}
+.footer{margin-top:20px;padding-top:15px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:760px){
+ .app{padding:10px 10px 32px;overflow-x:hidden}
+ header{padding-top:5px}
+ .tabs{gap:3px}.tabs a{font-size:11px;padding:9px 3px}
+ .monthbar{display:grid;grid-template-columns:38px minmax(0,1fr) 38px auto;gap:5px;margin:13px 0}
+ .monthbar .month{min-width:0;width:100%;font-size:17px;padding:8px 4px}
+ .hero{grid-template-columns:1fr}.donut-card{min-height:260px}
+ .kpis{grid-template-columns:1fr 1fr}.compare{grid-template-columns:1fr 1fr}.ytd{grid-template-columns:1fr 1fr}
+ .row{grid-template-columns:1fr;gap:7px;padding:12px 0}
+ .row>*{min-width:0;width:100%}.row>*:nth-child(4){display:block}
+ #budgetList .row{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--panel2);border:1px solid var(--border);border-radius:11px;padding:12px;margin-bottom:8px}
+ #budgetList .row>div:first-child{grid-column:1/-1}
+ #budgetList .row input{grid-column:1/2}
+ #budgetList .row>div:nth-child(3){grid-column:2/3;display:flex;align-items:center;justify-content:flex-end;font-weight:750}
+ #budgetList .row>div:nth-child(4){grid-column:1/-1}
+ #catList .row,#txList .row,#goalList .row,#debtList .row{background:var(--panel2);border:1px solid var(--border);border-radius:11px;padding:12px;margin-bottom:8px}
+ .formgrid{grid-template-columns:1fr}.full{grid-column:1}
+ .toolbar{align-items:flex-start;flex-wrap:wrap}
+}
+@media(max-width:390px){.tabs a{font-size:10px}.kpis{grid-template-columns:1fr}.kpi:first-child{grid-column:auto}.compare{grid-template-columns:1fr 1fr}}
+
+/* V19 Overview: full-width stacked monthly categories */
+#overview .hero{grid-template-columns:1fr}
+#overview .kpis{grid-template-columns:1fr}
+#overview .kpi,#overview .kpi:first-child{grid-column:1/-1;width:100%}
+#overview .kpi{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 15px}
+#overview .kpi .value{margin-top:0;text-align:right;white-space:nowrap}
+.overview-actions{display:flex;justify-content:flex-end;margin:0 0 10px}
+.primary-add{background:#121821;color:#eef2f7;border:1px solid #293342;font-weight:750;box-shadow:none}
+.primary-add:hover,.primary-add:active{background:#19212d;color:#fff;border-color:#354357}
+@media(max-width:760px){
+ #overview .donut-card{min-height:250px}
+ #overview .kpi{min-height:58px}
+ #overview .kpi .label{font-size:11px}
+ #overview .kpi .value{font-size:20px}
+ .overview-actions{justify-content:stretch}
+ .overview-actions .primary-add{width:100%;padding:11px}
+}
+
+/* V21 month/year controls */
+.monthbar .month{line-height:1.15}
+.monthbar .month .month-title{display:block;font-size:19px;font-weight:850;color:var(--text)}
+.monthbar .month .month-range{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-top:4px}
+.month-select-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 14px}
+.month-select-grid label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.month-select-grid select,.month-select-grid input{margin-top:6px}
+.month-apply{width:100%;padding:11px;font-weight:750}
+@media(max-width:520px){
+ .month-select-grid{grid-template-columns:1fr}
+ .month-modal-box{width:100%}
+ .monthbar{grid-template-columns:36px minmax(0,1fr) 36px}
+ .monthbar .today{grid-column:1/-1;width:100%}
+}
+
+/* V22 hierarchy: month/year first, section tabs second */
+header .monthbar{margin:12px 0 9px}
+header .tabs{margin-top:0}
+@media(max-width:520px){
+ header .monthbar{margin:10px 0 8px}
+}
+
+/* V23: selected month/year is the page context */
+.monthbar{grid-template-columns:38px minmax(0,1fr) 38px!important}
+.monthbar .month{width:100%}
+@media(max-width:520px){
+ .monthbar{grid-template-columns:36px minmax(0,1fr) 36px!important}
+}
+
+/* V24 definitive month selector layout */
+header .monthbar{
+  display:grid!important;
+  grid-template-columns:42px minmax(0,1fr) 42px!important;
+  align-items:center;
+  gap:8px;
+  width:100%;
+}
+header .monthbar .arrow{
+  display:flex!important;
+  align-items:center;
+  justify-content:center;
+  width:42px;
+  height:42px;
+  min-width:42px;
+}
+header .monthbar #monthBtn{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  min-width:0!important;
+  width:100%!important;
+  height:auto!important;
+  padding:7px 6px!important;
+  overflow:visible!important;
+  color:var(--text)!important;
+  background:#121821;
+  border:1px solid var(--border);
+}
+header .monthbar #monthBtn .month-title{
+  display:block!important;
+  visibility:visible!important;
+  color:var(--text)!important;
+  font-size:18px;
+  font-weight:850;
+}
+@media(max-width:520px){
+ header .monthbar{grid-template-columns:38px minmax(0,1fr) 38px!important;gap:6px}
+ header .monthbar .arrow{width:38px;min-width:38px;height:42px}
+ header .monthbar #monthBtn .month-title{font-size:17px}
+}
+
+/* V26 transactions */
+.tx-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 12px}
+.tx-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px}
+.tx-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.tx-name{font-weight:750;overflow-wrap:anywhere}.tx-amount{font-weight:850;white-space:nowrap}
+.tx-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:7px;color:var(--muted);font-size:11px}
+.tx-actions{display:flex;gap:6px;margin-top:10px}.tx-actions button{flex:1}
+.empty-state{text-align:center;color:var(--muted);padding:28px 12px}
+.type-expense{color:var(--purple)}.type-bill{color:var(--orange)}.type-debt{color:var(--red)}.type-saving{color:var(--green)}.type-income{color:var(--blue)}
+@media(max-width:520px){
+ .tx-filters{grid-template-columns:1fr}
+ #transactions .toolbar .btn{width:100%}
+}
+
+/* V27 reliable transaction form: normal routed page, not a modal */
+a.btn{display:inline-flex;align-items:center;justify-content:center}
+.transaction-form-view .card{max-width:680px;margin:0 auto}
+.save-transaction{width:100%;padding:12px;font-weight:800;background:#19212d;color:var(--text);border-color:#354357}
+.save-transaction:active{background:#222c3a}
+@media(max-width:520px){
+ .transaction-form-view .card{border-radius:12px}
+ .transaction-form-view .toolbar{display:flex;flex-direction:row;flex-wrap:nowrap;align-items:flex-start}
+ .transaction-form-view .toolbar .btn{width:auto}
+}
+</style>
+</head>
+<body><div class="app">
+<header><div class="brand">Budget</div>
+<div class="monthbar"><button class="btn arrow" id="prev">‹</button><button class="btn month" id="monthBtn"><span class="month-title">September 2026</span></button><button class="btn arrow" id="next">›</button></div>
+<nav class="tabs">
+<a href="#overview" data-view="overview" class="active">Overview</a>
+<a href="#transactions" data-view="transactions">Transactions</a>
+<a href="#budget" data-view="budget">Budget</a>
+<a href="#goals" data-view="goals">Goals</a>
+<a href="#debt" data-view="debt">Debt</a>
+</nav></header>
+
+<div class="modal" id="monthModal">
+  <div class="modalbox month-modal-box">
+    <div class="toolbar"><h2>Select month & year</h2><button class="btn" id="closeMonth">✕</button></div>
+    <div class="month-select-grid">
+      <label>Month
+        <select id="monthSelect">
+          <option value="0">January</option><option value="1">February</option><option value="2">March</option>
+          <option value="3">April</option><option value="4">May</option><option value="5">June</option>
+          <option value="6">July</option><option value="7">August</option><option value="8">September</option>
+          <option value="9">October</option><option value="10">November</option><option value="11">December</option>
+        </select>
+      </label>
+      <label>Year<input id="yearSelect" type="number" min="1900" max="2200" inputmode="numeric"></label>
+    </div>
+    <button class="btn month-apply" id="applyMonth">Go to month</button>
+  </div>
+</div>
+
+<section id="overview" class="view active">
+<div class="overview-actions"><a class="btn primary-add" href="#transaction-form">+ Add transaction</a></div>
+<div class="grid hero"><div class="card donut-card"><div class="donut" id="donut"><div class="donut-center"><div class="num" id="net">$0</div><div class="sub">Net</div></div></div></div>
+<div class="grid kpis">
+<div class="card kpi"><div class="label">Income</div><div class="value" id="income">$0</div></div>
+<div class="card kpi"><div class="label"><span class="dot purple"></span>Variable spent</div><div class="value" id="variable">$0</div></div>
+<div class="card kpi"><div class="label"><span class="dot orange"></span>Bills / Fixed</div><div class="value" id="bills">$0</div></div>
+<div class="card kpi"><div class="label"><span class="dot red"></span>Debt payments</div><div class="value" id="debtPaid">$0</div></div>
+<div class="card kpi"><div class="label"><span class="dot green"></span>Savings / Investments</div><div class="value" id="saved">$0</div></div>
+<div class="card kpi"><div class="label"><span class="dot yellow"></span>Remaining</div><div class="value" id="remaining">$0</div></div>
+</div></div>
+<div class="card section"><h2>Compared with previous month</h2><div class="grid compare" id="compare"></div></div>
+<div class="card section"><h2>6-month trend</h2><div class="small">Outflow vs. savings</div><div class="trend" id="trend"></div></div>
+<div class="card section"><h2>Year to date</h2><div class="grid ytd" id="ytd"></div></div>
+<div class="grid hero section"><div class="card"><h2>Goals</h2><div id="goalSummary"></div></div><div class="card"><h2>Debt</h2><div id="debtSummary"></div></div></div>
+</section>
+
+<section id="transactions" class="view"><div class="card"><div class="toolbar"><div><h2>Transactions</h2><div class="small" id="txMonth"></div></div><a class="btn" href="#transaction-form">+ Add transaction</a></div><div class="tx-filters">
+<select id="txFilterType"><option value="all">All transaction types</option><option value="income">Income</option><option value="expense">Variable expenses</option><option value="bill">Bills / fixed</option><option value="saving">Savings / investments</option><option value="debt">Debt payments</option></select>
+<select id="txFilterCategory"><option value="all">All categories</option></select>
+</div><div id="txList"></div></div></section>
+<section id="budget" class="view"><div class="card"><div class="toolbar"><div><h2>Monthly budget</h2><div class="small" id="budgetMonth"></div></div><button class="btn" id="copyBudget">Copy previous month</button></div><div id="budgetList"></div></div><div class="card section"><div class="toolbar"><div><h2>Categories</h2><div class="small">Customize variable and fixed categories.</div></div><button class="btn" id="addCat">+ Category</button></div><div id="catList"></div></div></section>
+<section id="goals" class="view"><div class="card"><div class="toolbar"><div><h2>Goals</h2><div class="small">Savings and investment targets persist across months.</div></div><button class="btn" id="addGoal">+ Goal</button></div><div id="goalList"></div></div></section>
+<section id="debt" class="view"><div class="card"><div class="toolbar"><div><h2>Debt accounts</h2><div class="small">Track balances, APR and payments.</div></div><button class="btn" id="addDebt">+ Debt</button></div><div id="debtList"></div></div></section>
+<div class="footer"><button class="btn" id="export">Export backup</button><label class="btn">Import backup<input id="import" type="file" accept=".json" hidden></label><button class="danger" id="resetMonth">Reset selected month</button></div>
+</div>
+
+<section id="transaction-form" class="view transaction-form-view">
+<div class="card">
+<div class="toolbar"><div><h2 id="txModalTitle">Add transaction</h2><div class="small">Enter a transaction for the selected budget month.</div></div><a class="btn" href="#transactions">Cancel</a></div>
+<div class="formgrid">
+<input id="editingTxId" type="hidden">
+<label>Date<input id="txDate" type="date"></label>
+<label>Amount<input id="txAmount" type="number" min="0" step=".01" inputmode="decimal" placeholder="0.00"></label>
+<label>Type<select id="txType"><option value="income">Income</option><option value="expense">Variable expense</option><option value="bill">Bill / fixed expense</option><option value="saving">Savings contribution</option><option value="debt">Debt payment</option></select></label>
+<label>Category / Account<select id="txCategory"></select></label>
+<label class="full">Description<input id="txDesc" placeholder="Merchant or note"></label>
+<div class="full"><button class="btn save-transaction" id="saveTx">Save transaction</button></div>
+</div></div></section>
+<script>
+const $=id=>document.getElementById(id), money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(n)||0); function uid(){return (globalThis.crypto&&typeof crypto.randomUUID==='function')?crypto.randomUUID():'id-'+Date.now()+'-'+Math.random().toString(16).slice(2)}
+const KEY='budgetTrackerV17';
+const defaults={categories:[{name:'Groceries',kind:'variable'},{name:'Eating Out',kind:'variable'},{name:'Gas / Transportation',kind:'variable'},{name:'Entertainment',kind:'variable'},{name:'Shopping',kind:'variable'},{name:'Personal Care',kind:'variable'},{name:'Pets',kind:'variable'},{name:'Rent / Mortgage',kind:'fixed'},{name:'Utilities',kind:'fixed'},{name:'Internet',kind:'fixed'},{name:'Phone',kind:'fixed'},{name:'Insurance',kind:'fixed'},{name:'Subscriptions',kind:'fixed'},{name:'Gym',kind:'fixed'}],transactions:[],budgets:{},goals:[],debts:[]};
+let data=load(), cursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+function cloneDefaults(){return JSON.parse(JSON.stringify(defaults))}
+function load(){
+ try{
+   const saved=JSON.parse(localStorage.getItem(KEY)||'{}');
+   return Object.assign(cloneDefaults(),saved);
+ }catch(e){
+   return cloneDefaults();
+ }
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));renderAll()}
+function key(d=cursor){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
+function monthName(d=cursor){return d.toLocaleDateString('en-US',{month:'long',year:'numeric'})}
+function monthDates(d=cursor){let last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();return d.toLocaleDateString('en-US',{month:'short'})+' 1–'+last+', '+d.getFullYear()}
+function txs(k=key()){return data.transactions.filter(t=>t.date.slice(0,7)===k)}
+function totals(k=key()){let a={income:0,variable:0,bills:0,debt:0,saved:0};txs(k).forEach(t=>{a[t.type==='expense'?'variable':t.type==='bill'?'bills':t.type==='saving'?'saved':t.type==='debt'?'debt':'income']+=+t.amount});a.remaining=a.income-a.variable-a.bills-a.debt-a.saved;a.expenses=a.variable+a.bills;return a}
+function showView(id){
+ const valid=['overview','transactions','transaction-form','budget','goals','debt'];
+ if(!valid.includes(id)) id='overview';
+ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));
+ const tabId=id==='transaction-form'?'transactions':id;
+ document.querySelectorAll('.tabs a').forEach(a=>a.classList.toggle('active',a.dataset.view===tabId));
+ if(id==='transaction-form'&&!$('editingTxId').value)prepareNewTransaction();
+}
+function route(){
+ const id=(location.hash||'#overview').slice(1);
+ showView(id);
+}
+window.addEventListener('hashchange',route);
+$('prev').onclick=()=>{cursor.setMonth(cursor.getMonth()-1);renderAll()};$('next').onclick=()=>{cursor.setMonth(cursor.getMonth()+1);renderAll()};
+$('monthBtn').onclick=()=>{
+ $('monthSelect').value=String(cursor.getMonth());
+ $('yearSelect').value=String(cursor.getFullYear());
+ $('monthModal').classList.add('open');
+};
+$('closeMonth').onclick=()=>$('monthModal').classList.remove('open');
+$('monthModal').addEventListener('click',e=>{if(e.target===$('monthModal'))$('monthModal').classList.remove('open')});
+$('applyMonth').onclick=()=>{
+ const m=Number($('monthSelect').value), y=Number($('yearSelect').value);
+ if(!Number.isInteger(y)||y<1900||y>2200)return alert('Enter a year between 1900 and 2200.');
+ cursor=new Date(y,m,1);
+ $('monthModal').classList.remove('open');
+ renderAll();
+};
+function renderAll(){ $('monthBtn').innerHTML='<span class="month-title">'+monthName()+'</span>'; $('txMonth').textContent=monthName()+' · '+monthDates();$('budgetMonth').textContent=monthName()+' · '+monthDates();renderOverview();renderTransactions();renderBudget();renderGoals();renderDebts()}
+function renderOverview(){let t=totals();for(let [id,v] of [['income',t.income],['variable',t.variable],['bills',t.bills],['debtPaid',t.debt],['saved',t.saved],['remaining',t.remaining]])$(id).textContent=money(v);
+$('remaining').className='value '+(t.remaining>0?'positive':t.remaining<0?'negative':'');$('net').textContent=money(t.remaining);$('net').className='num '+(t.remaining>0?'positive':t.remaining<0?'negative':'');
+let alloc=[t.variable,t.bills,t.debt,t.saved,Math.max(0,t.remaining)],sum=alloc.reduce((a,b)=>a+b,0)||1,c=['var(--purple)','var(--orange)','var(--red)','var(--green)','var(--yellow)'],start=0,parts=[];alloc.forEach((v,i)=>{let end=start+v/sum*100;parts.push(`${c[i]} ${start}% ${end}%`);start=end});$('donut').style.background=`conic-gradient(${parts.join(',')})`;
+let p=new Date(cursor);p.setMonth(p.getMonth()-1);let prev=totals(key(p));let mets=[['Expenses',t.expenses,prev.expenses,false],['Savings',t.saved,prev.saved,true],['Debt paid',t.debt,prev.debt,true],['Remaining',t.remaining,prev.remaining,true]];
+$('compare').innerHTML=mets.map(([l,a,b,good])=>{let d=a-b,pct=b?Math.abs(d/b*100):null,cls=d===0?'':(good?(d>0?'positive':'negative'):(d>0?'negative':'positive'));return `<div class="card"><div class="label">${l}</div><div class="big ${cls}">${d>=0?'+':''}${money(d)}</div><div class="small">${pct===null?'No prior baseline':pct.toFixed(1)+'% '+(d>=0?'more':'less')}</div></div>`}).join('');
+let rows=[];for(let i=5;i>=0;i--){let d=new Date(cursor);d.setMonth(d.getMonth()-i);let x=totals(key(d));rows.push({m:d.toLocaleDateString('en-US',{month:'short'}),out:x.expenses+x.debt,s:x.saved})}let mx=Math.max(1,...rows.flatMap(r=>[r.out,r.s]));$('trend').innerHTML=rows.map(r=>`<div class="trend-col"><div class="bars"><div class="bar" style="height:${r.out/mx*100}%;background:var(--purple)" title="Outflow ${money(r.out)}"></div><div class="bar" style="height:${r.s/mx*100}%;background:var(--green)" title="Saved ${money(r.s)}"></div></div><div class="monthlab">${r.m}</div></div>`).join('');
+let y={income:0,expenses:0,debt:0,saved:0,net:0};for(let m=0;m<=cursor.getMonth();m++){let x=totals(cursor.getFullYear()+'-'+String(m+1).padStart(2,'0'));y.income+=x.income;y.expenses+=x.expenses;y.debt+=x.debt;y.saved+=x.saved;y.net+=x.remaining}$('ytd').innerHTML=[['Income',y.income],['Spent',y.expenses],['Debt paid',y.debt],['Saved',y.saved],['Net',y.net]].map(([l,v])=>`<div class="card"><div class="label">${l}</div><div class="big ${l==='Net'?(v>0?'positive':v<0?'negative':''):''}">${money(v)}</div></div>`).join('');
+$('goalSummary').innerHTML=data.goals.length?data.goals.map(g=>`<div style="margin:10px 0"><b>${esc(g.name)}</b> <span class="small">${money(g.current)} / ${money(g.target)}</span><div class="progress"><span style="width:${Math.min(100,g.target?g.current/g.target*100:0)}%"></span></div></div>`).join(''):'<div class="small">No goals yet.</div>';
+$('debtSummary').innerHTML=data.debts.length?data.debts.map(d=>`<div style="margin:10px 0"><b>${esc(d.name)}</b><div class="small">${money(d.balance)} remaining · ${d.apr||0}% APR</div></div>`).join(''):'<div class="small">No debts yet.</div>'}
+function typeLabel(t){return ({income:'Income',expense:'Variable expense',bill:'Bill / fixed',saving:'Savings / investment',debt:'Debt payment'})[t]||t}
+function renderTransactions(){
+ let all=txs().sort((a,b)=>b.date.localeCompare(a.date));
+ let type=$('txFilterType')?.value||'all',cat=$('txFilterCategory')?.value||'all';
+ let cats=[...new Set(all.map(t=>t.category))].sort();
+ if($('txFilterCategory')){
+   let old=$('txFilterCategory').value;
+   $('txFilterCategory').innerHTML='<option value="all">All categories</option>'+cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+   $('txFilterCategory').value=cats.includes(old)?old:'all'; cat=$('txFilterCategory').value;
+ }
+ let a=all.filter(t=>(type==='all'||t.type===type)&&(cat==='all'||t.category===cat));
+ $('txList').innerHTML=a.length?a.map(t=>`<div class="tx-card">
+   <div class="tx-top"><div><div class="tx-name">${esc(t.desc||t.category)}</div><div class="tx-meta"><span>${formatTxDate(t.date)}</span><span>•</span><span>${esc(t.category)}</span><span class="pill type-${t.type}">${typeLabel(t.type)}</span></div></div>
+   <div class="tx-amount ${t.type==='income'?'positive':''}">${t.type==='income'?'+':'−'}${money(t.amount)}</div></div>
+   <div class="tx-actions"><button class="btn" onclick="editTx('${t.id}')">Edit</button><button class="danger" onclick="delTx('${t.id}')">Delete</button></div>
+ </div>`).join(''):`<div class="empty-state">No transactions for ${monthName()}${type!=='all'||cat!=='all'?' with these filters':''}.</div>`;
+}
+function formatTxDate(v){let d=new Date(v+'T12:00:00');return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
+function renderBudget(){let b=data.budgets[key()]||{};$('budgetList').innerHTML=data.categories.map(c=>{let actual=txs().filter(t=>t.category===c.name&&(t.type==='expense'||t.type==='bill')).reduce((a,t)=>a+(+t.amount),0);return `<div class="row"><div><span class="dot ${c.kind==='fixed'?'orange':'purple'}"></span><b>${esc(c.name)}</b><div class="small">${c.kind==='fixed'?'Fixed':'Variable'}</div></div><label><span class="small">Planned</span><input class="money" type="number" value="${b[c.name]||''}" placeholder="$0" onchange="setBudget('${enc(c.name)}',this.value)"></label><div class="money"><span class="small">Actual</span><br>${money(actual)}</div><div class="small">${b[c.name]?Math.round(actual/b[c.name]*100):0}% used</div><span></span></div>`}).join('');
+$('catList').innerHTML=data.categories.map(c=>`<div class="row"><b>${esc(c.name)}</b><span class="pill">${c.kind}</span><button class="btn" onclick="renameCat('${enc(c.name)}')">Rename</button><button class="btn" onclick="toggleCat('${enc(c.name)}')">Make ${c.kind==='fixed'?'variable':'fixed'}</button><button class="danger" onclick="removeCat('${enc(c.name)}')">Remove</button></div>`).join('')}
+function renderGoals(){$('goalList').innerHTML=data.goals.length?data.goals.map(g=>`<div class="row"><div><b>${esc(g.name)}</b><div class="progress"><span style="width:${Math.min(100,g.target?g.current/g.target*100:0)}%"></span></div></div><div>${money(g.current)}</div><div>${money(g.target)}</div><div>${g.date||'—'}</div><button class="danger" onclick="removeGoal('${g.id}')">Remove</button></div>`).join(''):'<div class="small">No goals yet.</div>'}
+function renderDebts(){$('debtList').innerHTML=data.debts.length?data.debts.map(d=>`<div class="row"><div><b>${esc(d.name)}</b><div class="small">${d.apr||0}% APR</div></div><div>${money(d.balance)}</div><div>${money(d.minimum||0)} min.</div><div></div><button class="danger" onclick="removeDebt('${d.id}')">Remove</button></div>`).join(''):'<div class="small">No debt accounts yet.</div>'}
+function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}function enc(s){return encodeURIComponent(s)}
+function prepareNewTransaction(){
+ $('editingTxId').value='';
+ $('txModalTitle').textContent='Add transaction';
+ let now=new Date(),same=now.getFullYear()===cursor.getFullYear()&&now.getMonth()===cursor.getMonth();
+ $('txDate').value=same?localISO(now):key()+'-01';
+ $('txAmount').value='';$('txDesc').value='';$('txType').value='expense';fillCats();
+}
+function openTxModal(tx=null){
+ if(!tx){prepareNewTransaction();location.hash='transaction-form';return}
+ $('editingTxId').value=tx.id;
+ $('txModalTitle').textContent='Edit transaction';
+ $('txDate').value=tx.date;$('txAmount').value=tx.amount;$('txDesc').value=tx.desc||'';$('txType').value=tx.type;
+ fillCats(tx.category);location.hash='transaction-form';
+}
+function localISO(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+$('txType').onchange=()=>fillCats();
+function fillCats(selected=''){
+ let type=$('txType').value,opts=[];
+ if(type==='income')opts=['Paycheck','Side Income','Other Income'];
+ else if(type==='expense')opts=data.categories.filter(c=>c.kind==='variable').map(c=>c.name);
+ else if(type==='bill')opts=data.categories.filter(c=>c.kind==='fixed').map(c=>c.name);
+ else if(type==='saving')opts=data.goals.map(g=>g.name);
+ else opts=data.debts.map(d=>d.name);
+ if(selected&&!opts.includes(selected))opts.unshift(selected);
+ $('txCategory').innerHTML=opts.length?opts.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join(''):'<option value="">Create an account/goal first</option>';
+ if(selected)$('txCategory').value=selected;
+}
+function reverseLinkedEffect(t){
+ if(t.type==='saving'){let g=data.goals.find(x=>x.name===t.category);if(g)g.current=Math.max(0,(+g.current||0)-(+t.amount||0))}
+ if(t.type==='debt'){let d=data.debts.find(x=>x.name===t.category);if(d)d.balance=(+d.balance||0)+(+t.amount||0)}
+}
+function applyLinkedEffect(t){
+ if(t.type==='saving'){let g=data.goals.find(x=>x.name===t.category);if(g)g.current=(+g.current||0)+(+t.amount||0)}
+ if(t.type==='debt'){let d=data.debts.find(x=>x.name===t.category);if(d)d.balance=Math.max(0,(+d.balance||0)-(+t.amount||0))}
+}
+$('saveTx').onclick=()=>{
+ let amount=+$('txAmount').value,date=$('txDate').value,type=$('txType').value,cat=$('txCategory').value,id=$('editingTxId').value;
+ if(!date||amount<=0||!cat)return alert('Enter a date, amount, and category/account.');
+ let selectedMonth=date.slice(0,7);
+ if(selectedMonth!==key()&&!confirm(`This transaction is dated outside ${monthName()}. Save it to ${selectedMonth}?`))return;
+ let old=id?data.transactions.find(t=>t.id===id):null;if(old)reverseLinkedEffect(old);
+ let item={id:id||uid(),date,amount,type,category:cat,desc:$('txDesc').value.trim()};
+ if(old)Object.assign(old,item);else data.transactions.push(item);
+ applyLinkedEffect(item);save();location.hash='transactions';
+}
+function editTx(id){let t=data.transactions.find(x=>x.id===id);if(t)openTxModal(t)}
+function delTx(id){
+ let t=data.transactions.find(x=>x.id===id);if(!t)return;
+ if(confirm('Delete this transaction?')){reverseLinkedEffect(t);data.transactions=data.transactions.filter(x=>x.id!==id);save()}
+}
+function setBudget(n,v){let b=data.budgets[key()]||(data.budgets[key()]={});b[decodeURIComponent(n)]=+v||0;save()}
+$('copyBudget').onclick=()=>{let p=new Date(cursor);p.setMonth(p.getMonth()-1);data.budgets[key()]={...(data.budgets[key(p)]||{})};save()}
+$('addCat').onclick=()=>{let n=prompt('Category name');if(!n||data.categories.some(c=>c.name.toLowerCase()===n.trim().toLowerCase()))return;let fixed=confirm('Make this a fixed bill category?\\nOK = Fixed, Cancel = Variable');data.categories.push({name:n.trim(),kind:fixed?'fixed':'variable'});save()}
+function renameCat(n){let old=decodeURIComponent(n),v=prompt('Rename category',old);if(!v||v===old)return;let c=data.categories.find(x=>x.name===old);if(c)c.name=v;Object.values(data.budgets).forEach(b=>{if(old in b){b[v]=b[old];delete b[old]}});data.transactions.forEach(t=>{if(t.category===old)t.category=v});save()}
+function toggleCat(n){let c=data.categories.find(x=>x.name===decodeURIComponent(n));if(c)c.kind=c.kind==='fixed'?'variable':'fixed';save()}
+function removeCat(n){let x=decodeURIComponent(n);if(confirm('Remove '+x+'? Existing transactions will remain.')){data.categories=data.categories.filter(c=>c.name!==x);Object.values(data.budgets).forEach(b=>delete b[x]);save()}}
+$('addGoal').onclick=()=>{let n=prompt('Goal name');if(!n)return;let target=+prompt('Target amount')||0,current=+prompt('Current amount')||0,date=prompt('Target date (YYYY-MM-DD), optional')||'';data.goals.push({id:uid(),name:n,target,current,date});save()};function removeGoal(id){if(confirm('Remove this goal?')){data.goals=data.goals.filter(g=>g.id!==id);save()}}
+$('addDebt').onclick=()=>{let n=prompt('Debt name');if(!n)return;let balance=+prompt('Current balance')||0,apr=+prompt('APR (%)')||0,minimum=+prompt('Minimum monthly payment')||0;data.debts.push({id:uid(),name:n,balance,apr,minimum});save()};function removeDebt(id){if(confirm('Remove this debt account?')){data.debts=data.debts.filter(d=>d.id!==id);save()}}
+$('resetMonth').onclick=()=>{if(!confirm('Reset '+monthName()+'? This clears only this month’s transactions and planned budget.'))return;if(!confirm('Confirm again: permanently clear '+monthName()+'?'))return;data.transactions=data.transactions.filter(t=>t.date.slice(0,7)!==key());delete data.budgets[key()];save()}
+$('export').onclick=()=>{let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='budget-backup.json';a.click();URL.revokeObjectURL(a.href)}
+$('import').onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{data=JSON.parse(r.result);save()}catch{alert('Invalid backup file.')}};r.readAsText(f)}
+$('txFilterType').onchange=renderTransactions;
+$('txFilterCategory').onchange=renderTransactions;
+renderAll();route();
+</script></body></html>
